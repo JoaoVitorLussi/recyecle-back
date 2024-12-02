@@ -14,16 +14,16 @@ router.post("/material", authMiddleware, async (req, resp) => {
         return resp.status(400).json({ error: "Campos imagem e email são obrigatórios." })
     }
 
-    try {
-        // const iaResponse = await axios.post("http://127.0.0.1:5000/predict", { imagem: base_64 })
-        // const classificacao = iaResponse.data[0].classe || "Não classificado"
+    let base_tratato = base_64.replace('data:image/png;base64,', '');
 
-        //fazer switch case dps
+    try {
+        const iaResponse = await axios.post("http://127.0.0.1:5000/predict", { imagem: base_tratato })
+
+        const classificacao = iaResponse.data[0].classe || "Não classificado"
 
         let usuario = await usuarioService.getIdByEmail(email)
-        console.log(usuario)
         const material = await model.Material.schema("public").create({
-            classificacao: 'Vidro',
+            classificacao: classificacao,
             classificacao_usuario,
             base_64,
             id_usuario: usuario.id,
