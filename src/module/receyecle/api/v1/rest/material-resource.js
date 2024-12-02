@@ -20,14 +20,15 @@ router.post("/material", authMiddleware, async (req, resp) => {
 
         //fazer switch case dps
 
-        let id_usuario = await usuarioService.getIdByEmail(email)
+        let usuario = await usuarioService.getIdByEmail(email)
+        console.log(usuario)
         const material = await model.Material.schema("public").create({
             classificacao: 'Vidro',
             classificacao_usuario,
             base_64,
-            id_usuario,
-            created_at: new Date(),
-            updated_at: new Date(),
+            id_usuario: usuario.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
         })
 
         resp.status(200).json({ detail: "Material criado com sucesso", material })
@@ -43,6 +44,7 @@ router.get("/material", authMiddleware, async (req, resp) => {
         const { search = "" } = req.query
 
         const materiais = await model.Material.schema("public").findAll({
+            include: "usuario",
             where: {
                 classificacao: {
                     [Op.like]: `%${search}%`,
@@ -82,15 +84,9 @@ router.put("/material/:id", authMiddleware, async (req, resp) => {
     const { classificacao_usuario, base_64 } = req.body
 
     try {
-        let classificacao = null
-        if (base_64) {
-            const iaResponse = await axios.post("http://127.0.0.1:5000/predict", { imagem: base_64 })
-            classificacao = iaResponse.data[0] || "Não classificado"
-        }
 
         const [updated] = await model.Material.schema("public").update(
             {
-                classificacao,
                 classificacao_usuario,
                 base_64,
                 updated_at: new Date(),

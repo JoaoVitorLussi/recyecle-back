@@ -10,10 +10,16 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Material.belongsTo(models.Usuario,{foreignKey:'id_usuario'});
+      Material.belongsTo(models.Usuario,{foreignKey:'id_usuario', as:'usuario'});
     }
   }
   Material.init({
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     classificacao: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -34,11 +40,11 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       },
     },
-    created_at: {
+    createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    updated_at: {
+    updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
     }

@@ -17,7 +17,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       base_64: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       id_usuario: {
         type: Sequelize.INTEGER,
