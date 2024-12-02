@@ -4,29 +4,33 @@ const model = require("../../../models")
 const authMiddleware = require("../../../../../../middlewares/authMiddleware")
 const { Op } = require("sequelize")
 const axios = require("axios")
+const usuarioService = require("../../../../../services/usuario-service")
 
 // Criar material
 router.post("/material", authMiddleware, async (req, resp) => {
-    const { classificacao_usuario, base_64, id_usuario } = req.body
+    const { classificacao_usuario, base_64, email } = req.body
 
-    if (!base_64 || !id_usuario) {
-        return resp.status(400).json({ error: "Campos base_64 e id_usuario são obrigatórios." })
+    if (!base_64 || !email) {
+        return resp.status(400).json({ error: "Campos imagem e email são obrigatórios." })
     }
-    console.log(base_64)
+
     try {
         // const iaResponse = await axios.post("http://127.0.0.1:5000/predict", { imagem: base_64 })
-        // const classificacao = iaResponse.data[0] || "Não classificado"
+        // const classificacao = iaResponse.data[0].classe || "Não classificado"
 
-        // const material = await model.Material.schema("public").create({
-        //     classificacao,
-        //     classificacao_usuario,
-        //     base_64,
-        //     id_usuario,
-        //     created_at: new Date(),
-        //     updated_at: new Date(),
-        // })
+        //fazer switch case dps
 
-        // resp.status(200).json({ detail: "Material criado com sucesso", material })
+        let id_usuario = await usuarioService.getIdByEmail(email)
+        const material = await model.Material.schema("public").create({
+            classificacao: 'Vidro',
+            classificacao_usuario,
+            base_64,
+            id_usuario,
+            created_at: new Date(),
+            updated_at: new Date(),
+        })
+
+        resp.status(200).json({ detail: "Material criado com sucesso", material })
     } catch (error) {
         console.error("Erro ao criar material:", error)
         resp.status(500).json({ error: "Erro ao criar material." })
