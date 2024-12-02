@@ -19,7 +19,6 @@ router.post("/material", authMiddleware, async (req, resp) => {
     try {
         const iaResponse = await axios.post("http://127.0.0.1:5000/predict", { imagem: base_tratato })
 
-        console.log(iaResponse.data);
         const classificacao = iaResponse.data[0].classe || "Não classificado"
 
         let usuario = await usuarioService.getIdByEmail(email)
@@ -48,7 +47,7 @@ router.get("/material", authMiddleware, async (req, resp) => {
             include: "usuario",
             where: {
                 classificacao: {
-                    [Op.like]: `%${search}%`,
+                    [Op.iLike]: `%${search}%`,
                 },
             },
         })

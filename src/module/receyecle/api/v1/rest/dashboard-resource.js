@@ -56,29 +56,30 @@ router.get("/dashboard-material-usuario", authMiddleware, async function (req, r
         });
 
         sql = `WITH material_usuario_cte AS (
-                SELECT
-                    m.classificacao AS nome_classificacao,
-                    m.id_usuario,
-                    u.nome AS nome_usuario,
-                    COALESCE(COUNT(*), 0) AS quantidade
-                FROM
-                    material m
-                LEFT JOIN
-                    usuario u on m.id_usuario = u.id
-                GROUP BY
-                    m.classificacao, m.id_usuario, u.nome
-            )
             SELECT
-                nome_classificacao AS name,
-                ARRAY_AGG(quantidade ORDER BY nome_classificacao) AS data
+                c.nome_classificacao,
+                u.nome AS nome_usuario,
+                COALESCE(COUNT(m.id), 0) AS quantidade
             FROM
-                material_usuario_cte
+                    (SELECT DISTINCT classificacao AS nome_classificacao FROM material) c
+                        CROSS JOIN
+                usuario u
+                        LEFT JOIN
+                material m ON m.classificacao = c.nome_classificacao AND m.id_usuario = u.id
+            WHERE
+                u.flag_admin = true
             GROUP BY
-                nome_classificacao
-            HAVING
-                SUM(CASE WHEN quantidade > 0 THEN 1 ELSE 0 END) > 0
-            ORDER BY
-                nome_classificacao;`
+                c.nome_classificacao, u.nome
+        )
+               SELECT
+                   nome_classificacao AS name,
+                   ARRAY_AGG(quantidade ORDER BY nome_usuario) AS data
+               FROM
+                   material_usuario_cte
+               GROUP BY
+                   nome_classificacao
+               ORDER BY
+                   nome_classificacao;`
 
         dados = await sequelize.query(sql, {
             type: QueryTypes.SELECT,
